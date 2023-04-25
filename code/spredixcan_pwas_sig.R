@@ -49,6 +49,19 @@ final_col_order <- c("ENSG ID", "Gene Symbol", "CHR", "pos.p0",
 
   "susie.cs_index", "susie.susie_pip", "susie.mu2")
 
+all_final_col_order <- c("ENSG ID", "Gene Symbol", "CHR", "pos.p0",
+  "wingo.TWAS Z", "wingo.TWAS p-value", "wingo.COLOC PP4",
+
+  "spxcan.best.zscore", "spxcan.lasso.zscore",
+  "spxcan.best.pvalue", "spxcan.lasso.pvalue",
+  "spxcan.best.pred_perf_r2", "spxcan.lasso.pred_perf_r2",
+  "spxcan.best.bfr_thresh",
+  "spxcan.lasso.bfr_thresh",
+  "spxcan.best.bfr_sig",
+  "spxcan.lasso.bfr_sig",
+
+  "susie.cs_index", "susie.susie_pip", "susie.mu2")
+
 pwas_best_sig_write_table_df <- pwas_chr_pos_key %>%
   inner_join(spxcan_best_df %>% filter(bfr_sig == TRUE), by = c("ENSG ID" = "gene")) %>%
   select(any_of(c(final_col_order)))
@@ -57,11 +70,23 @@ pwas_lasso_sig_write_table_df <- pwas_chr_pos_key %>%
   inner_join(spxcan_lasso_df %>% filter(bfr_sig == TRUE), by = c("ENSG ID" = "gene")) %>%
   select(any_of(c(final_col_order)))
 
+names(spxcan_best_df) <- paste0("spxcan.best.", names(spxcan_best_df))
+names(spxcan_lasso_df) <- paste0("spxcan.lasso.", names(spxcan_lasso_df))
+
+all_pwas_lasso_sig_write_table_df <- pwas_chr_pos_key %>%
+  inner_join(spxcan_lasso_df, by = c("ENSG ID" = "spxcan.lasso.gene")) %>%
+  full_join(spxcan_best_df, by = c("ENSG ID" = "spxcan.best.gene")) %>%
+  select(any_of(c(all_final_col_order)))
+
+
 browser()
 
+# write_delim(pwas_best_sig_write_table_df, "data/sig_pwas_spxcan_best.tsv", delim = "\t")
+# write_delim(pwas_lasso_sig_write_table_df, "data/sig_pwas_spxcan_lasso.tsv", delim = "\t")
 
-write_delim(pwas_best_sig_write_table_df, "data/sig_pwas_spxcan_best.tsv", delim = "\t")
-write_delim(pwas_lasso_sig_write_table_df, "data/sig_pwas_spxcan_lasso.tsv", delim = "\t")
+
+write_delim(all_pwas_lasso_sig_write_table_df, "data/all_pwas_spxcan_lasso_vs_best_models.tsv", delim = "\t")
+
 
 # susie877df <- fread("data/877.susieIrss.txt") %>%
 #   filter(type == "gene") %>%
