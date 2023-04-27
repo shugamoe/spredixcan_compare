@@ -13,10 +13,10 @@ susie877df <- fread("data/877.susieIrss.txt") %>%
 names(susie877df) <- paste0("susie.", names(susie877df))
 
 
-wingo_s11_df <- fread("data/wingo_nc_2022_s11.csv") %>%
+wingo_s4_df <- fread("data/wingo_nc_2022_s4.csv") %>%
   filter(Trait %in% c("Alzheimer's disease (AD1)")) %>%
-  dplyr::select(all_of(c("Ensembl gene ID", "Gene symbol", "TWAS Z", "TWAS p-value", "COLOC PP4", "SMR SNP chr")))
-names(wingo_s11_df) <- paste0("wingo.", names(wingo_s11_df))
+  dplyr::select(all_of(c("Ensembl gene ID", "Gene symbol", "PWAS Z score", "PWAS p-value", "COLOC PP4", "SMR SNP chr")))
+names(wingo_s4_df) <- paste0("wingo.", names(wingo_s4_df))
 
 spxcan_best_df <- fread("data/AD_GWAS_GWAX_meta_888_pqtl_wingo_nc_2022_best_spredixcan.csv") %>%
   select(all_of(c("gene", "zscore", "pvalue", "pred_perf_r2")))
@@ -32,7 +32,7 @@ pwas_chr_pos_key <- fread("data/pwas_chr_pos_key.txt") %>%
   select(all_of(c("ENSG ID", "Gene Symbol", "CHR", "pos.p0")))
 
 final_col_order <- c("ENSG ID", "Gene Symbol", "CHR", "pos.p0",
-  "wingo.TWAS Z", "wingo.TWAS p-value", "wingo.COLOC PP4",
+  "wingo.PWAS Z score", "wingo.PWAS p-value", "wingo.COLOC PP4",
 
   "spxcan.best.zscore", "spxcan.lasso.zscore",
   "spxcan.best.pvalue", "spxcan.lasso.pvalue",
@@ -40,7 +40,7 @@ final_col_order <- c("ENSG ID", "Gene Symbol", "CHR", "pos.p0",
 
   "susie.cs_index", "susie.susie_pip", "susie.mu2")
 
-pwas_write_table_df <- wingo_s11_df %>%
+pwas_write_table_df <- wingo_s4_df %>%
   left_join(pwas_chr_pos_key, by = c("wingo.Ensembl gene ID" = "ENSG ID")) %>%
   left_join(spxcan_best_df, by = c("wingo.Ensembl gene ID" = "spxcan.best.gene")) %>%
   left_join(spxcan_lasso_df, by = c("wingo.Ensembl gene ID" = "spxcan.lasso.gene")) %>%
@@ -50,8 +50,10 @@ pwas_write_table_df <- wingo_s11_df %>%
          `CHR` = ifelse(is.na(`CHR`), `wingo.SMR SNP chr`, `CHR`)) %>%
   select(all_of(c(final_col_order)))
 
+browser()
 
-write_delim(pwas_write_table_df, "data/wingo_s11_vs_pwas_spxcan_best_and_lasso_with_susie.tsv", delim = "\t")
+
+write_delim(pwas_write_table_df, "data/wingo_s4_vs_pwas_spxcan_best_and_lasso_with_susie.tsv", delim = "\t")
 
 # susie877df <- fread("data/877.susieIrss.txt") %>%
 #   filter(type == "gene") %>%
@@ -59,17 +61,17 @@ write_delim(pwas_write_table_df, "data/wingo_s11_vs_pwas_spxcan_best_and_lasso_w
 # names(susie877df) <- paste0("susie.", names(susie877df))
 # 
 # 
-# wingo_s11_df <- fread("data/wingo_nc_2022_s11.csv") %>%
+# wingo_s4_df <- fread("data/wingo_nc_2022_s4.csv") %>%
 #   filter(Trait %in% c("Alzheimer's disease (AD1)")) %>%
-#   dplyr::select(all_of(c("Ensembl gene ID", "Gene symbol", "TWAS Z", "TWAS p-value", "COLOC PP4")))
-# names(wingo_s11_df) <- paste0("wingo.", names(wingo_s11_df))
+#   dplyr::select(all_of(c("Ensembl gene ID", "Gene symbol", "PWAS Z score", "PWAS p-value", "COLOC PP4")))
+# names(wingo_s4_df) <- paste0("wingo.", names(wingo_s4_df))
 # 
-# spxcan_lasso_df <- fread("data/AD_GWAS_GWAX_meta_888_brain_TWAS_lasso_model.csv") %>%
+# spxcan_lasso_df <- fread("data/AD_GWAS_GWAX_meta_888_brain_PWAS_lasso_model.csv") %>%
 #   select(all_of(c("gene", "zscore", "pvalue", "pred_perf_r2")))
 # names(spxcan_lasso_df) <- paste0("spxcan.lasso.", names(spxcan_lasso_df))
 # 
-# # spxcan_best_df <- fread("data/AD_GWAS_GWAX_meta_888_brain_TWAS_best_model.csv")
-# spxcan_best_df <- fread("data/AD_GWAS_GWAX_meta_888_brain_TWAS_pretend_model.csv") %>%
+# # spxcan_best_df <- fread("data/AD_GWAS_GWAX_meta_888_brain_PWAS_best_model.csv")
+# spxcan_best_df <- fread("data/AD_GWAS_GWAX_meta_888_brain_PWAS_pretend_model.csv") %>%
 #   select(all_of(c("gene", "zscore", "pvalue", "pred_perf_r2")))
 # names(spxcan_best_df) <- paste0("spxcan.best.", names(spxcan_best_df))
 # 
@@ -79,12 +81,12 @@ write_delim(pwas_write_table_df, "data/wingo_s11_vs_pwas_spxcan_best_and_lasso_w
 #   select(all_of(c("ENSG ID", "Gene Symbol", "CHR", "pos.p0")))
 # 
 # final_col_order <- c("ENSG ID", "Gene Symbol", "CHR", "pos.p0",
-#   "wingo.TWAS Z", "wingo.TWAS p-value", "wingo.COLOC PP4",
+#   "wingo.PWAS Z score", "wingo.PWAS p-value", "wingo.COLOC PP4",
 #   "spxcan.lasso.zscore", "spxcan.lasso.pvalue", "spxcan.lasso.pred_perf_r2",
 #   "spxcan.best.zscore", "spxcan.best.pvalue", "spxcan.best.pred_perf_r2",
 #   "susie.cs_index", "susie.susie_pip", "susie.mu2")
 # 
-# twas_write_table_df <- wingo_s11_df %>%
+# twas_write_table_df <- wingo_s4_df %>%
 #   left_join(chr_pos_key, by = c("wingo.Ensembl gene ID" = "ENSG ID")) %>%
 #   left_join(spxcan_lasso_df, by = c("wingo.Ensembl gene ID" = "spxcan.lasso.gene")) %>%
 #   left_join(spxcan_best_df, by = c("wingo.Ensembl gene ID" = "spxcan.best.gene")) %>%
@@ -96,4 +98,4 @@ write_delim(pwas_write_table_df, "data/wingo_s11_vs_pwas_spxcan_best_and_lasso_w
 # 
 # 
 # 
-# write_delim(twas_write_table_df, "data/wingo_s11_vs_twas_spxcan_best_and_lasso_and_susie.tsv", delim = "\t")
+# write_delim(twas_write_table_df, "data/wingo_s4_vs_twas_spxcan_best_and_lasso_and_susie.tsv", delim = "\t")
