@@ -7,36 +7,67 @@ library(data.table)
 library(tidyr)
 library(readr)
 
-# Schartz
-schwartz_best_df <- fread("data/AD_GWAS_GWAX_meta_888_pqtl_wingo_nc_2022_best_spredixcan.csv") %>%
+# Schartz (GWAS only)
+schwartz_gwas_best_df <- fread("data/spxcan_pwas_output/AD_GWAS_only_888_pqtl_wingo_nc_2022_best_spredixcan.csv") %>%
   select(all_of(c("gene", "zscore", "pvalue", "pred_perf_r2")))
 
-num_best_non_na <- schwartz_best_df %>%
+num_best_non_na <- schwartz_gwas_best_df %>%
   filter(!is.na(zscore)) %>%
   nrow()
 
 best_thresh <- .05 / num_best_non_na
 
-schwartz_lasso_df <- fread("data/AD_GWAS_GWAX_meta_888_pqtl_wingo_nc_2022_lasso_spredixcan.csv") %>%
+schwartz_gwas_lasso_df <- fread("data/spxcan_pwas_output/AD_GWAS_only_888_pqtl_wingo_nc_2022_lasso_spredixcan.csv") %>%
   select(all_of(c("gene", "zscore", "pvalue", "pred_perf_r2")))
 
-num_lasso_non_na <- schwartz_lasso_df %>%
+num_lasso_non_na <- schwartz_gwas_lasso_df %>%
   filter(!is.na(zscore)) %>%
   nrow()
 
 lasso_thresh <- .05 / num_lasso_non_na
 
-schwartz_lasso_df <- schwartz_lasso_df %>%
+schwartz_gwas_lasso_df <- schwartz_gwas_lasso_df %>%
   mutate(bfr_sig = ifelse(pvalue < lasso_thresh, TRUE, FALSE),
          bfr_thresh = lasso_thresh,
          )
 
-schwartz_best_df <- schwartz_best_df %>%
+schwartz_gwas_best_df <- schwartz_gwas_best_df %>%
 mutate(bfr_sig = ifelse(pvalue < best_thresh, TRUE, FALSE),
        bfr_thresh = best_thresh)
 
-names(schwartz_best_df) <- paste0("schwartz.best.", names(schwartz_best_df))
-names(schwartz_lasso_df) <- paste0("schwartz.lasso.", names(schwartz_lasso_df))
+names(schwartz_gwas_best_df) <- paste0("schwartz_gwas.best.", names(schwartz_gwas_best_df))
+names(schwartz_gwas_lasso_df) <- paste0("schwartz_gwas.lasso.", names(schwartz_gwas_lasso_df))
+
+# Schartz
+schwartz_gwasx_best_df <- fread("data/AD_GWAS_GWAX_meta_888_pqtl_wingo_nc_2022_best_spredixcan.csv") %>%
+  select(all_of(c("gene", "zscore", "pvalue", "pred_perf_r2")))
+
+num_best_non_na <- schwartz_gwasx_best_df %>%
+  filter(!is.na(zscore)) %>%
+  nrow()
+
+best_thresh <- .05 / num_best_non_na
+
+schwartz_gwasx_lasso_df <- fread("data/AD_GWAS_GWAX_meta_888_pqtl_wingo_nc_2022_lasso_spredixcan.csv") %>%
+  select(all_of(c("gene", "zscore", "pvalue", "pred_perf_r2")))
+
+num_lasso_non_na <- schwartz_gwasx_lasso_df %>%
+  filter(!is.na(zscore)) %>%
+  nrow()
+
+lasso_thresh <- .05 / num_lasso_non_na
+
+schwartz_gwasx_lasso_df <- schwartz_gwasx_lasso_df %>%
+  mutate(bfr_sig = ifelse(pvalue < lasso_thresh, TRUE, FALSE),
+         bfr_thresh = lasso_thresh,
+         )
+
+schwartz_gwasx_best_df <- schwartz_gwasx_best_df %>%
+mutate(bfr_sig = ifelse(pvalue < best_thresh, TRUE, FALSE),
+       bfr_thresh = best_thresh)
+
+names(schwartz_gwasx_best_df) <- paste0("schwartz_gwasx.best.", names(schwartz_gwasx_best_df))
+names(schwartz_gwasx_lasso_df) <- paste0("schwartz_gwasx.lasso.", names(schwartz_gwasx_lasso_df))
 
 # Bellenguez
 bellen_best_df <- fread("data/spxcan_pwas_output/AD_Bellenguez_GWAS_NG_2022_888_pqtl_wingo_nc_2022_best_spredixcan.csv") %>%
@@ -110,13 +141,13 @@ final_col_order <- c("ENSG ID", "Gene Symbol", "CHR", "pos.p0",
   "wingo.TWAS Z", "wingo.TWAS p-value", "wingo.COLOC PP4",
 
   # Schwartz
-  "schwartz.best.zscore", "schwartz.lasso.zscore",
-  "schwartz.best.pvalue", "schwartz.lasso.pvalue",
-  "schwartz.best.pred_perf_r2", "schwartz.lasso.pred_perf_r2",
-  "schwartz.best.bfr_thresh",
-  "schwartz.lasso.bfr_thresh",
-  "schwartz.best.bfr_sig",
-  "schwartz.lasso.bfr_sig",
+  "schwartz_gwasx.best.zscore", "schwartz_gwasx.lasso.zscore",
+  "schwartz_gwasx.best.pvalue", "schwartz_gwasx.lasso.pvalue",
+  "schwartz_gwasx.best.pred_perf_r2", "schwartz_gwasx.lasso.pred_perf_r2",
+  "schwartz_gwasx.best.bfr_thresh",
+  "schwartz_gwasx.lasso.bfr_thresh",
+  "schwartz_gwasx.best.bfr_sig",
+  "schwartz_gwasx.lasso.bfr_sig",
 
   # Bellenguez
   "bellen.best.zscore", "bellen.lasso.zscore",
@@ -141,14 +172,23 @@ final_col_order <- c("ENSG ID", "Gene Symbol", "CHR", "pos.p0",
 all_final_col_order <- c("ENSG ID", "Gene Symbol", "CHR", "pos.p0",
   "wingo.TWAS Z", "wingo.TWAS p-value", "wingo.COLOC PP4",
 
+  # Schwartz (GWAS only)
+  "schwartz_gwas.best.zscore", "schwartz_gwas.lasso.zscore",
+  "schwartz_gwas.best.pvalue", "schwartz_gwas.lasso.pvalue",
+  "schwartz_gwas.best.pred_perf_r2", "schwartz_gwas.lasso.pred_perf_r2",
+  "schwartz_gwas.best.bfr_thresh",
+  "schwartz_gwas.lasso.bfr_thresh",
+  "schwartz_gwas.best.bfr_sig",
+  "schwartz_gwas.lasso.bfr_sig",
+
   # Schwartz
-  "schwartz.best.zscore", "schwartz.lasso.zscore",
-  "schwartz.best.pvalue", "schwartz.lasso.pvalue",
-  "schwartz.best.pred_perf_r2", "schwartz.lasso.pred_perf_r2",
-  "schwartz.best.bfr_thresh",
-  "schwartz.lasso.bfr_thresh",
-  "schwartz.best.bfr_sig",
-  "schwartz.lasso.bfr_sig",
+  "schwartz_gwasx.best.zscore", "schwartz_gwasx.lasso.zscore",
+  "schwartz_gwasx.best.pvalue", "schwartz_gwasx.lasso.pvalue",
+  "schwartz_gwasx.best.pred_perf_r2", "schwartz_gwasx.lasso.pred_perf_r2",
+  "schwartz_gwasx.best.bfr_thresh",
+  "schwartz_gwasx.lasso.bfr_thresh",
+  "schwartz_gwasx.best.bfr_sig",
+  "schwartz_gwasx.lasso.bfr_sig",
 
   # Bellenguez
   "bellen.best.zscore", "bellen.lasso.zscore",
@@ -171,17 +211,29 @@ all_final_col_order <- c("ENSG ID", "Gene Symbol", "CHR", "pos.p0",
   "susie.cs_index", "susie.susie_pip", "susie.mu2")
 
 
-# Schwartz best
+# Schwartz best (GWAS only)
 pwas_best_sig_write_table_df <- pwas_chr_pos_key %>%
-  inner_join(schwartz_best_df %>% filter(schwartz.best.bfr_sig == TRUE), by = c("ENSG ID" = "schwartz.best.gene")) %>%
+  inner_join(schwartz_gwas_best_df %>% filter(schwartz_gwas.best.bfr_sig == TRUE), by = c("ENSG ID" = "schwartz_gwas.best.gene")) %>%
   select(any_of(c(final_col_order)))
 
 pwas_lasso_sig_write_table_df <- pwas_chr_pos_key %>%
-  inner_join(schwartz_lasso_df %>% filter(schwartz.lasso.bfr_sig == TRUE), by = c("ENSG ID" = "schwartz.lasso.gene")) %>%
+  inner_join(schwartz_gwas_lasso_df %>% filter(schwartz_gwas.lasso.bfr_sig == TRUE), by = c("ENSG ID" = "schwartz_gwas.lasso.gene")) %>%
   select(any_of(c(final_col_order)))
 
-write_delim(pwas_best_sig_write_table_df, "data/sig_schwartz_spxcan_best.tsv", delim = "\t")
-write_delim(pwas_lasso_sig_write_table_df, "data/sig_schwartz_spxcan_lasso.tsv", delim = "\t")
+write_delim(pwas_best_sig_write_table_df, "data/sig_schwartz_gwas_spxcan_best.tsv", delim = "\t")
+write_delim(pwas_lasso_sig_write_table_df, "data/sig_schwartz_gwas_spxcan_lasso.tsv", delim = "\t")
+
+# Schwartz best
+pwas_best_sig_write_table_df <- pwas_chr_pos_key %>%
+  inner_join(schwartz_gwasx_best_df %>% filter(schwartz_gwasx.best.bfr_sig == TRUE), by = c("ENSG ID" = "schwartz_gwasx.best.gene")) %>%
+  select(any_of(c(final_col_order)))
+
+pwas_lasso_sig_write_table_df <- pwas_chr_pos_key %>%
+  inner_join(schwartz_gwasx_lasso_df %>% filter(schwartz_gwasx.lasso.bfr_sig == TRUE), by = c("ENSG ID" = "schwartz_gwasx.lasso.gene")) %>%
+  select(any_of(c(final_col_order)))
+
+write_delim(pwas_best_sig_write_table_df, "data/sig_schwartz_gwasx_spxcan_best.tsv", delim = "\t")
+write_delim(pwas_lasso_sig_write_table_df, "data/sig_schwartz_gwasx_spxcan_lasso.tsv", delim = "\t")
 
 # Bellen best
 bellen_best_sig_write_table_df <- pwas_chr_pos_key %>%
@@ -208,15 +260,14 @@ write_delim(wight_best_sig_write_table_df, "data/sig_wight_spxcan_best.tsv", del
 write_delim(wight_lasso_sig_write_table_df, "data/sig_wight_spxcan_lasso.tsv", delim = "\t")
 
 all_pwas_lasso_sig_write_table_df <- pwas_chr_pos_key %>%
-  inner_join(schwartz_lasso_df, by = c("ENSG ID" = "schwartz.lasso.gene")) %>%
-  full_join(schwartz_best_df, by = c("ENSG ID" = "schwartz.best.gene")) %>%
+  inner_join(schwartz_gwasx_lasso_df, by = c("ENSG ID" = "schwartz_gwasx.lasso.gene")) %>%
+  full_join(schwartz_gwasx_best_df, by = c("ENSG ID" = "schwartz_gwasx.best.gene")) %>%
+  full_join(schwartz_gwas_lasso_df, by = c("ENSG ID" = "schwartz_gwas.lasso.gene")) %>%
+  full_join(schwartz_gwas_best_df, by = c("ENSG ID" = "schwartz_gwas.best.gene")) %>%
   full_join(bellen_best_df, by = c("ENSG ID" = "bellen.best.gene")) %>%
   full_join(bellen_lasso_df, by = c("ENSG ID" = "bellen.lasso.gene")) %>%
   full_join(wight_best_df, by = c("ENSG ID" = "wight.best.gene")) %>%
   full_join(wight_lasso_df, by = c("ENSG ID" = "wight.lasso.gene")) %>%
   select(any_of(c(all_final_col_order)))
-
-
-browser()
 
 write_delim(all_pwas_lasso_sig_write_table_df, "data/all_pwas_spxcan_lasso_vs_best_models.tsv", delim = "\t")
