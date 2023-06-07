@@ -144,6 +144,36 @@ mutate(bfr_sig = ifelse(pvalue < best_thresh, TRUE, FALSE),
 names(bellen_best_df) <- paste0("bellen.best.", names(bellen_best_df))
 names(bellen_lasso_df) <- paste0("bellen.lasso.", names(bellen_lasso_df))
 
+# Jansen
+jansen_best_df <- fread("data/spxcan_pwas_output/Jansen_meta_GWAS_2019_NG_888_pqtl_wingo_nc_2022_best_spredixcan.csv") %>%
+  select(all_of(c("gene", "zscore", "pvalue", "pred_perf_r2")))
+
+num_best_non_na <- jansen_best_df %>%
+  filter(!is.na(zscore)) %>%
+  nrow()
+
+best_thresh <- .05 / num_best_non_na
+
+jansen_lasso_df <- fread("data/spxcan_pwas_output/Jansen_meta_GWAS_2019_NG_888_pqtl_wingo_nc_2022_lasso_spredixcan.csv") %>%
+  select(all_of(c("gene", "zscore", "pvalue", "pred_perf_r2")))
+
+num_lasso_non_na <- jansen_lasso_df %>%
+  filter(!is.na(zscore)) %>%
+  nrow()
+
+lasso_thresh <- .05 / num_lasso_non_na
+
+jansen_lasso_df <- jansen_lasso_df %>%
+  mutate(bfr_sig = ifelse(pvalue < lasso_thresh, TRUE, FALSE),
+         bfr_thresh = lasso_thresh,
+         )
+
+jansen_best_df <- jansen_best_df %>%
+mutate(bfr_sig = ifelse(pvalue < best_thresh, TRUE, FALSE),
+       bfr_thresh = best_thresh)
+
+names(jansen_best_df) <- paste0("jansen.best.", names(jansen_best_df))
+names(jansen_lasso_df) <- paste0("jansen.lasso.", names(jansen_lasso_df))
 
 final_col_order <- c("ENSG ID", "Gene Symbol", "CHR", "pos.p0",
   "susie.cs_index", "susie.pip", "susie.mu2",
@@ -166,7 +196,12 @@ final_col_order <- c("ENSG ID", "Gene Symbol", "CHR", "pos.p0",
   "wight.best.zscore", "wight.lasso.zscore",
   "wight.best.pvalue", "wight.lasso.pvalue",
   "wight.best.bfr_thresh", "wight.lasso.bfr_thresh",
-  "wight.best.pred_perf_r2", "wight.lasso.pred_perf_r2"
+  "wight.best.pred_perf_r2", "wight.lasso.pred_perf_r2",
+
+  "jansen.best.zscore", "jansen.lasso.zscore",
+  "jansen.best.pvalue", "jansen.lasso.pvalue",
+  "jansen.best.bfr_thresh", "jansen.lasso.bfr_thresh",
+  "jansen.best.pred_perf_r2", "jansen.lasso.pred_perf_r2"
 )
 
 
@@ -181,6 +216,8 @@ pwas_write_table_df <- susie877df %>%
   left_join(bellen_lasso_df, by = c("susie.id" = "bellen.lasso.gene")) %>%
   left_join(wight_best_df, by = c("susie.id" = "wight.best.gene")) %>%
   left_join(wight_lasso_df, by = c("susie.id" = "wight.lasso.gene")) %>%
+  left_join(jansen_best_df, by = c("susie.id" = "jansen.best.gene")) %>%
+  left_join(jansen_lasso_df, by = c("susie.id" = "jansen.lasso.gene")) %>%
   rename(`ENSG ID` = "susie.id",
          `susie.pip` = "susie.susie_pip") %>%
   mutate(`CHR` = `susie.chrom`) %>%
