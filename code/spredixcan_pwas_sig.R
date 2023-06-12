@@ -39,7 +39,7 @@ names(schwartz_gwas_best_df) <- paste0("schwartz_gwas.best.", names(schwartz_gwa
 names(schwartz_gwas_lasso_df) <- paste0("schwartz_gwas.lasso.", names(schwartz_gwas_lasso_df))
 
 # Schartz
-schwartz_gwasx_best_df <- fread("data/AD_GWAS_GWAX_meta_888_pqtl_wingo_nc_2022_best_spredixcan.csv") %>%
+schwartz_gwasx_best_df <- fread("data/spxcan_pwas_output/AD_GWAS_GWAX_meta_888_pqtl_wingo_nc_2022_best_spredixcan.csv") %>%
   select(all_of(c("gene", "zscore", "pvalue", "pred_perf_r2")))
 
 num_best_non_na <- schwartz_gwasx_best_df %>%
@@ -48,7 +48,7 @@ num_best_non_na <- schwartz_gwasx_best_df %>%
 
 best_thresh <- .05 / num_best_non_na
 
-schwartz_gwasx_lasso_df <- fread("data/AD_GWAS_GWAX_meta_888_pqtl_wingo_nc_2022_lasso_spredixcan.csv") %>%
+schwartz_gwasx_lasso_df <- fread("data/spxcan_pwas_output/AD_GWAS_GWAX_meta_888_pqtl_wingo_nc_2022_lasso_spredixcan.csv") %>%
   select(all_of(c("gene", "zscore", "pvalue", "pred_perf_r2")))
 
 num_lasso_non_na <- schwartz_gwasx_lasso_df %>%
@@ -248,8 +248,7 @@ all_final_col_order <- c("ENSG ID", "Gene Symbol", "CHR", "pos.p0",
   "jansen.best.bfr_sig",
   "jansen.lasso.bfr_sig",
 
-  "susie.cs_index", "susie.susie_pip", "susie.mu2")
-
+  "susie.cs_index", "susie.susie_pip", "susie.mu2") 
 
 # Schwartz best (GWAS only)
 pwas_best_sig_write_table_df <- pwas_chr_pos_key %>%
